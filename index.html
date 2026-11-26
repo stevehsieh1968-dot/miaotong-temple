@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>妙通寺 線上禮佛</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 莊嚴、安靜、溫暖，像真的走過廟埕、拾級入殿
+   IDEA: 一座可以走進去的小寺——廟埕、大殿、拜墊、蒲團、燈塔、祿位牌位
+   PICTURE: 兩張實景照當舞台，自己的人像在上面走動、拜拜、靜坐
+   COLOUR and TYPE: 朱紅柱色主場、金箔輔色、屋瓦橙點綴；Noto Serif TC 如匾額字
+   LAYOUT: 頂列→咒語條→舞台（廟埕/大殿）＋動作列→功德服務→經文→頁尾 */
+:root{color-scheme:light dark;
+--bg:light-dark(#fbf5ea,#1c0b0a);--ink:light-dark(#2a1410,#f6e9d4);--soft:light-dark(#6d4a3e,#cdb79c);
+--red:#9e1b1b;--deep:#5a0d10;--gold:#d9a640;--gold2:#f3d58a;
+--card:light-dark(#fff,#2a1311);--line:light-dark(#ead9bd,#4a2622)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:120px}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Noto Serif TC","PMingLiU",serif;overflow-x:clip}
+h1,h2,h3{font-weight:900;line-height:1.1;text-wrap:balance;margin:0}
+button,input,select{font:inherit}button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.band{padding:clamp(28px,4vw,64px) max(5vw,16px)}.wrap{max-width:1240px;margin:auto}
+.hidden{display:none!important}
+.top{background:var(--deep);color:#f8e7c4;position:sticky;top:0;z-index:40;border-bottom:2px solid var(--gold)}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:8px max(4vw,14px)}
+.brand{font-weight:900;font-size:22px;letter-spacing:.08em;margin-right:auto}
+.brand small{font-weight:400;font-size:14px;opacity:.8;margin-left:8px;letter-spacing:0}
+.stat{font-size:14px;white-space:nowrap}.stat b{color:var(--gold2);font-size:17px}
+.tbtn{min-height:40px;padding:4px 14px;border-radius:20px;border:1px solid #c9954055;background:#ffffff10;color:#f8e7c4;white-space:nowrap}
+.tbtn[aria-pressed=true]{background:var(--gold);color:var(--deep);border-color:var(--gold)}
+/* 舞台 */
+.scene{background:#1a0606;padding:12px 0 0;position:relative}
+.stage{isolation:isolate;position:relative;margin:auto;width:100%;container-type:inline-size;overflow:hidden;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+#gStage{aspect-ratio:832/574;max-width:min(1300px,calc((100vh - 170px)*1.45))}
+#hStage{aspect-ratio:1135/562;max-width:min(1400px,calc((100vh - 170px)*2.02))}
+.stage>img{position:absolute;left:0;top:0;width:100%;pointer-events:none}
+#gStage>img{height:100%}#hStage>img{height:100%}
+.tip{position:absolute;left:50%;top:2%;transform:translateX(-50%);background:#1d0807cc;color:#f8e7c4;border-radius:16px;padding:3px 14px;font-size:13px;white-space:nowrap;pointer-events:none;z-index:900}
+/* 人像 */
+.av{position:absolute;transform:translate(-50%,-100%);aspect-ratio:1/2;height:calc(var(--s,10)*1cqw);pointer-events:none}
+.av svg{width:100%;height:100%;overflow:visible;display:block}
+.av .nm{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:12px;line-height:1.2;padding:1px 7px;border-radius:9px;background:#000a;color:#fff3da;margin-bottom:2px}
+.av:is([data-pose=lotus],[data-pose=kneel]) .nm{bottom:72%}
+.av.me .nm{background:var(--gold);color:var(--deep);font-weight:600}
+.av.walking svg{animation:bob .32s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(-4%) rotate(1.5deg)}}
+.bowing .up{transform-box:view-box;transform-origin:30px 78px;animation:bow 2.4s ease-in-out 3}
+@keyframes bow{40%,60%{transform:scaleY(.66) translateY(4px)}}
+/* 熱點 */
+.hot{position:absolute;transform:translate(-50%,-50%);z-index:950;border:0;background:none;padding:0;display:grid;justify-items:center;gap:2px;color:#fff3da;font-size:13px;min-width:44px;min-height:44px;align-content:center}
+.hot::before{content:"";width:16px;height:16px;border-radius:50%;background:radial-gradient(#fff6c8,#f0b030 60%,#f0b03000 72%);box-shadow:0 0 12px 4px #ffcf5a99;animation:pulse 1.8s ease-in-out infinite}
+.hot span{background:#1d0807cc;border-radius:9px;padding:0 7px;white-space:nowrap}
+@keyframes pulse{50%{transform:scale(1.35);opacity:.7}}
+/* 殿內陳設 */
+@keyframes flick{50%{box-shadow:0 0 2cqw #ffd060}}
+.smoke{position:absolute;width:6cqw;height:18cqw;transform:translate(-50%,-100%);pointer-events:none;z-index:960}
+.smoke i{position:absolute;bottom:0;left:50%;width:1.4cqw;height:4cqw;border-radius:50%;background:radial-gradient(#fffb,#fff0 70%);animation:rise 4s linear infinite;opacity:0}
+.smoke i:nth-child(2){animation-delay:1.3s}.smoke i:nth-child(3){animation-delay:2.6s}
+@keyframes rise{0%{transform:translate(-50%,0) scale(.6);opacity:0}15%{opacity:.85}100%{transform:translate(-20%,-16cqw) scale(2.4);opacity:0}}
+.pv{opacity:0;transition:opacity .7s}.pv.show{opacity:1}
+#hTip{transition:opacity 1s}#hTip.off{opacity:0}
+.whit{position:absolute;border:0;padding:0;background:transparent;border-radius:.6cqw;z-index:600;cursor:pointer;transition:box-shadow .3s,background .3s}
+.whit:hover,.whit:focus-visible{background:#ffd06a1a;box-shadow:0 0 0 2px #f3d58a99,0 0 2.4cqw #ffcf5a66}
+.wsign{position:absolute;transform:translate(-50%,-50%);z-index:610;pointer-events:none;background:linear-gradient(#4a2414,#2e140a);color:#f3d58a;border:1px solid #a8742a;border-radius:.3cqw;padding:.15cqw .7cqw;font-size:clamp(9px,1.05cqw,15px);letter-spacing:.15em;white-space:nowrap}
+.wpanel{position:absolute;z-index:620;pointer-events:none;background:#1a0806e6;border:1px solid #d9a64099;border-radius:.8cqw;padding:.8cqw;color:#f8e7c4;text-align:center;font-size:clamp(10px,1.05cqw,14px);line-height:1.5;box-shadow:0 0 2cqw #000a}
+.wpanel h5{margin:0 0 .4cqw;color:#f3d58a;font-size:clamp(11px,1.2cqw,16px);letter-spacing:.2em}
+.wpanel p{margin:.4cqw 0;opacity:.7}.wpanel small{opacity:.7}
+.wpanel .wl{display:flex;flex-wrap:wrap;gap:.4cqw;justify-content:center;margin-bottom:.3cqw}
+.wpanel .wi{width:100%}.wpanel .wi b{color:#ffe9a8;margin-right:.5em}
+.mt{writing-mode:vertical-rl;padding:.4cqw .2cqw;min-height:5cqw;border-radius:.3cqw .3cqw 0 0;font-weight:600;border:1px solid #d9a640}
+.mt.r{background:#b3201d;color:#ffe9a8}.mt.y{background:#f2d36b;color:#5a0d10}
+/* 天燈・佛光・彩虹 */
+.pan{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}.pan::-webkit-scrollbar{display:none}
+.skyfx{position:absolute;inset:0;pointer-events:none;z-index:2;-webkit-mask:url(sky.png) 0 0/100% 100% no-repeat;mask:url(sky.png) 0 0/100% 100% no-repeat}
+.rainbow{position:absolute;left:-12%;width:124%;top:-4%;height:62%;border-radius:50% 50% 0 0/100% 100% 0 0;opacity:0;transition:opacity 2.5s;filter:blur(.35cqw);
+  background:radial-gradient(ellipse 50% 100% at 50% 100%,#0000 78%,#ff3b3b 79.2%,#ff9a2e 80.6%,#ffe53b 82%,#46d16a 83.4%,#3fa7ff 84.8%,#5b5bff 86.2%,#b05bff 87.4%,#0000 88.8%)}
+.rainbow.on{opacity:.85}
+.fg{position:absolute;transform:translate(-50%,-50%);aspect-ratio:1;border-radius:50%;pointer-events:none;mix-blend-mode:screen;opacity:0;transition:opacity 1.6s;z-index:3}
+.fg.on{opacity:1}
+.fg::before{content:"";position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(from 0deg,#ffe3a070 0 2deg,#0000 2deg 10deg);-webkit-mask:radial-gradient(circle,#0000 14%,#000 26%,#0006 45%,#0000 70%);mask:radial-gradient(circle,#0000 14%,#000 26%,#0006 45%,#0000 70%);animation:spin 40s linear infinite}
+.fg::after{content:"";position:absolute;inset:14%;border-radius:50%;background:radial-gradient(#ffd47a00 20%,#ffd47a40 38%,#0000 70%)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lantern{position:absolute;left:0;top:0;z-index:960;pointer-events:none;width:4.6cqw;height:6cqw;will-change:transform,opacity}
+.spark{position:absolute;width:0;height:0;z-index:965;pointer-events:none}
+.spark i{position:absolute;left:0;top:0;width:9cqw;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%) scale(.2);background:radial-gradient(#fffbe0,#ffe08acc 30%,#ffb34733 55%,#0000 70%);mix-blend-mode:screen;animation:burst 1.6s ease-out forwards}
+.spark em{position:absolute;left:0;top:0;width:.7cqw;height:.7cqw;border-radius:50%;background:#fff6c8;box-shadow:0 0 1cqw #ffd060;transform:rotate(var(--a)) translateX(0);animation:fly 1.5s ease-out forwards}
+@keyframes burst{30%{transform:translate(-50%,-50%) scale(1.2);opacity:1}100%{transform:translate(-50%,-50%) scale(1.6);opacity:0}}
+@keyframes fly{100%{transform:rotate(var(--a)) translateX(5cqw);opacity:0}}
+.rainbow.flash{opacity:1;filter:blur(.2cqw) brightness(1.35);transition:opacity .3s,filter .3s}
+.lantern u{position:absolute;left:50%;top:50%;width:520%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;mix-blend-mode:screen;background:repeating-conic-gradient(from 0deg,#ffe7a888 0 3deg,#0000 3deg 12deg);-webkit-mask:radial-gradient(circle,#000 10%,#0007 35%,#0000 68%);mask:radial-gradient(circle,#000 10%,#0007 35%,#0000 68%);animation:spin 18s linear infinite}
+.lantern u::after{content:"";position:absolute;inset:25%;border-radius:50%;background:radial-gradient(#fff3c8aa,#ffd47a33 45%,#0000 70%)}
+.lantern i{position:absolute;inset:0;border-radius:42% 42% 18% 18%/38% 38% 22% 22%;background:radial-gradient(ellipse at 50% 70%,#fff6cf,#ffb347 45%,#e0561e 90%);box-shadow:0 0 2cqw #ffb34799,0 0 4cqw #ff8a3a55}
+.lantern i::after{content:"";position:absolute;left:30%;right:30%;bottom:-6%;height:12%;border-radius:50%;background:#ffef9a;box-shadow:0 0 1cqw #ffd060}
+.lantern b{position:absolute;inset:12% 0 18%;display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;white-space:pre;font-size:clamp(8px,1.3cqw,16px);line-height:1.1;color:#8e1c1c;font-weight:900;letter-spacing:.05em;overflow:hidden}
+.wishes{display:flex;flex-wrap:wrap;gap:8px}
+.wishes button{min-height:44px;padding:0 14px;border-radius:22px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.wishes button[aria-pressed=true]{background:var(--red);color:#fff3da;border-color:var(--red)}
+
+
+.glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 30%,#ffd77a66,#0000 60%);opacity:0;transition:opacity 1.2s;z-index:5}
+.glow.on{opacity:1}
+.bless{position:absolute;left:50%;top:9%;transform:translateX(-50%);color:var(--gold2);font-size:clamp(18px,3.2vw,30px);font-weight:900;text-shadow:0 2px 12px #000;opacity:0;transition:opacity .6s;text-align:center;width:90%;pointer-events:none;z-index:970}
+.bless.on{opacity:1}
+.fade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .6s;z-index:999}.fade.on{opacity:1}
+.hwrap{position:relative;margin:auto;max-width:min(1400px,calc((100vh - 170px)*2.02))}
+.sitbox{position:absolute;z-index:980;background:#1d0807d9;border:1px solid var(--gold);border-radius:12px;color:#f8e7c4;cursor:default}
+.sitbox{left:1.5%;bottom:4%;padding:8px 14px;text-align:center;display:flex;align-items:center;gap:12px}.sitbox .breath{margin:0}
+.mouth{position:absolute;left:50%;top:23.7%;width:4cqw;height:5cqw;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(#fff6c8,#ffd06a88 40%,#0000 70%);z-index:970;pointer-events:none;opacity:0;transition:opacity .8s}
+.mouth.on{opacity:1;animation:pulse 2s ease-in-out infinite}
+.fly{position:absolute;left:0;top:0;z-index:975;pointer-events:none;font-weight:900;font-size:clamp(13px,2.3cqw,26px);color:#fffbe8;text-shadow:0 0 2px #7a1212,0 0 4px #7a1212,0 0 .8em #ffb830;white-space:nowrap;will-change:transform,opacity}
+.cap{position:absolute;left:50%;bottom:21%;transform:translateX(-50%);z-index:972;pointer-events:none;color:#fff1b8;font-weight:600;font-size:clamp(13px,1.9cqw,20px);text-shadow:0 1px 8px #000,0 0 10px #c8801a;white-space:nowrap;opacity:0;transition:opacity .5s}
+.cap.on{opacity:1}
+.av.absorb::after{animation:absorb .6s ease-out}
+@keyframes absorb{0%{transform:translate(-50%,-50%) scale(1.35);opacity:1;filter:brightness(1.6)}}
+.av.blessed::after{content:"";position:absolute;left:50%;top:38%;width:180%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(#ffe08a88,#ffd06a33 45%,#0000 70%);z-index:-1;animation:halo 4s ease-in-out infinite}
+@keyframes halo{50%{opacity:.55;transform:translate(-50%,-50%) scale(1.12)}}
+.breath{width:64px;height:64px;margin:4px auto;border-radius:50%;background:radial-gradient(var(--gold2),var(--gold));display:grid;place-items:center;color:var(--deep);font-weight:900;animation:breathe 10s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(.65)}50%{transform:scale(1)}}
+.sitbox b{display:block;font-size:20px;color:var(--gold2)}
+/* 入寺表單 */
+.entry{position:absolute;left:50%;top:calc(50% + 6px);transform:translate(-50%,-50%);z-index:990;width:min(500px,92%);background:#2a0c0be6;backdrop-filter:blur(6px);color:#f8e7c4;border:1px solid var(--gold);border-radius:14px;padding:18px 20px;cursor:default}
+.entry h2{font-size:clamp(24px,4vw,32px);color:var(--gold2)}
+.entry p{margin:4px 0 10px;opacity:.9;font-size:15px}
+.form{display:grid;gap:12px;margin-top:10px}
+.form label{display:grid;gap:4px;font-size:15px;color:var(--soft)}
+.entry .form label,.entry .lbl{color:#f3d58a;font-size:15px}
+input,select{min-height:44px;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:16px;width:100%}
+.entry input{background:#fff8ec;color:#2a1410;border-color:#c99540}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg{display:flex;border:1px solid var(--gold);border-radius:8px;overflow:hidden}
+.seg button{min-height:44px;padding:0 16px;border:0;background:transparent;color:#f8e7c4}
+.seg button[aria-pressed=true]{background:var(--gold);color:var(--deep);font-weight:600}
+.looks{display:flex;gap:8px;flex-wrap:wrap}
+.looks button{width:44px;height:44px;border-radius:50%;border:2px solid #fff3;padding:0}
+.looks button[aria-pressed=true]{border-color:var(--gold2);box-shadow:0 0 0 3px var(--gold)}
+.preview{width:56px;height:112px;flex:none}
+.go{min-height:46px;padding:0 24px;border-radius:8px;border:0;background:var(--gold);color:var(--deep);font-weight:900;font-size:18px;letter-spacing:.15em}
+.go.red{background:var(--red);color:#fff3da}
+/* 動作列 */
+.acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px max(3vw,10px) 16px}
+.act{min-height:44px;padding:0 15px;border-radius:22px;border:1px solid var(--gold);background:#2a0c0b;color:#f8e7c4;font-size:16px}
+.act.gold{background:var(--gold);color:var(--deep);border-color:var(--gold);font-weight:600}
+.tbtn.don{background:var(--gold);color:var(--deep);border-color:var(--gold);font-weight:600}
+.donband{margin-top:18px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;border:1px solid var(--gold);border-radius:14px;padding:18px 20px;background:linear-gradient(90deg,#ffffff12,#ffffff05)}
+.donband h3{font-size:26px;color:var(--gold2)}.donband p{margin:4px 0 0;opacity:.9}
+.act.svc{background:var(--red);color:#fff3da}.act.alt{background:transparent}
+.act:hover{background:var(--gold);color:var(--deep)}
+/* 對話框 */
+.modal{position:fixed;inset:0;z-index:60;background:#0009;display:grid;place-items:center;padding:16px}
+.box{background:var(--card);color:var(--ink);border-radius:14px;border-top:6px solid var(--red);width:min(520px,100%);max-height:90vh;overflow:auto;padding:22px 24px;position:relative}
+.box h3{font-size:26px;color:var(--red);margin-bottom:8px}
+.x{position:absolute;right:10px;top:10px;width:44px;height:44px;border:0;background:none;color:var(--soft);font-size:26px}
+@keyframes flip{to{transform:rotateX(360deg) translateY(-6px)}}
+.muted{color:var(--soft);font-size:14px}
+/* 服務 */
+.svcs{background:var(--deep);color:#f8e7c4}
+.svcs h2{font-size:clamp(30px,4vw,44px);color:var(--gold2)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:22px}
+.sc{background:#ffffff0d;border:1px solid #d9a64066;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.sc h3{font-size:26px;color:var(--gold2)}.sc p{margin:0;opacity:.9}.sc .go{align-self:flex-start}
+.wall{display:flex;flex-wrap:wrap;gap:10px;min-height:120px;align-items:flex-end;padding:12px;border-radius:10px;background:#00000033;margin-top:auto}
+.wall .empty{opacity:.6;font-size:14px;align-self:center}
+.lamp{width:44px;text-align:center;font-size:13px;line-height:1.2}
+.lamp::before{content:"";display:block;width:28px;height:34px;margin:0 auto 4px;border-radius:50% 50% 40% 40%;background:radial-gradient(circle at 50% 60%,#fff3c0,#f0a020 60%,#a8500e);box-shadow:0 0 16px #ffc04acc}
+.tab{writing-mode:vertical-rl;padding:10px 6px;min-height:150px;border-radius:6px 6px 2px 2px;font-weight:600;font-size:15px;letter-spacing:.1em;border:2px solid var(--gold)}
+.tab.long{background:#b3201d;color:#ffe9a8}.tab.lotus{background:#f2d36b;color:#5a0d10}.tab small{font-size:12px;font-weight:400}
+.sutra .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:40px}
+.sutra h2{font-size:clamp(28px,3.4vw,40px);color:var(--red);margin-bottom:14px}
+.gatha{font-size:24px;line-height:2;font-weight:600}
+.heart{line-height:2.1;font-size:17px;max-height:420px;overflow:auto;padding-right:10px;border-left:3px solid var(--gold);padding-left:18px}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) :is(.box h3,.sutra h2){color:var(--gold2)}}
+:root[data-theme=dark] :is(.box h3,.sutra h2){color:var(--gold2)}
+footer{background:#120404;color:#cdb79c;text-align:center;font-size:14px;padding:28px 16px}footer b{color:var(--gold2);font-size:18px}
+@media(max-width:900px){.grid,.sutra .wrap{grid-template-columns:minmax(0,1fr)}}
+#hStage .bless{top:auto;bottom:24%;font-size:clamp(16px,2.6vw,24px)}#hStage .tip{top:auto;bottom:1%}
+@media(max-width:600px){.sitbox{position:static;width:auto;height:auto;margin:8px 10px 0}.sitbox{display:flex;align-items:center;justify-content:center;gap:16px}.breath{margin:0}
+.brand small{display:none}  .entry{position:relative;left:auto;top:auto;transform:none;width:auto;margin:10px;border-radius:12px}
+  .av .nm{font-size:11px}.tip{font-size:12px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media(max-width:700px){#gStage{width:600px;max-width:none}#hStage{width:760px;max-width:none}.hwrap{max-width:none}
+  .stage .tip{display:none}.top .wrap{gap:4px 10px;padding:6px 12px}.brand{font-size:19px}.stat{font-size:12px}.stat b{font-size:15px}.tbtn{min-height:36px;padding:2px 10px;font-size:14px}#scStat,#cntStat,.tbtn.don{display:none}#gActs .act.gold{grid-column:1/-1}
+  .acts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:10px}.act{padding:0 4px;font-size:15px}
+  .modal{align-items:end;padding:0}.box{border-radius:16px 16px 0 0;max-height:85vh}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand">妙通寺<small>線上禮佛</small></div>
+  <span class="stat" id="cntStat">今日上香 <b id="cnt">0</b> 炷</span>
+  <span class="stat">此刻 <b id="ppl">0</b> 人在寺裡</span>
+  <span class="stat" id="scStat">時辰 <b id="sc">—</b></span>
+  <button class="tbtn don" data-a="donate">捐款護持</button>
+  <button class="tbtn" id="sBtn" aria-pressed="true">聲音 開</button>
+  <button class="tbtn hidden" id="outBtn">離開</button>
+</div></header>
+
+<section class="scene" id="gate">
+  <div class="pan"><div class="stage" id="gStage">
+    <img src="gate2.jpg" alt="白天的妙通寺廟埕，藍天白雲，中央有天公爐">
+    <div class="skyfx"><div class="rainbow" id="rainbow"></div></div>
+    <div class="fg" style="left:50%;top:30%;width:70cqw"></div>
+    <div class="tip" id="gTip">點廟埕地面走動・點發光圓點互動</div>
+    <div class="bless" id="gBless"></div>
+    <div class="fade" id="gFade"></div>
+  </div></div>
+    <form class="entry" id="entry">
+      <h2>妙通寺</h2>
+      <p>山中古剎，香火裊裊。留下稱呼、選個樣子，進來走走、拜一拜。</p>
+      <div class="form">
+        <label>你的稱呼<input id="nick" maxlength="10" placeholder="例如：小明" required></label>
+        <div class="row" style="align-items:flex-start">
+          <svg class="preview" id="pv" viewBox="0 0 60 120"></svg>
+          <div style="display:grid;gap:10px;flex:1">
+            <div class="row"><span class="lbl">你是</span><div class="seg" id="sex"><button type="button" aria-pressed="true" data-v="0">善男</button><button type="button" aria-pressed="false" data-v="1">信女</button></div></div>
+            <div class="row"><span class="lbl">你的樣子</span><div class="looks" id="looks"></div></div>
+          </div>
+        </div>
+        <button class="go">入寺</button>
+      </div>
+    </form>
+  <nav class="acts hidden" id="gActs" aria-label="廟埕功能">
+    <button class="act svc" data-a="enter">入寺</button>
+    <button class="act" data-a="incense">點香</button>
+    <button class="act" data-a="bow">拜拜</button>
+    <button class="act svc" data-a="sky">點天燈</button>
+    <button class="act gold" data-a="donate">捐款護持</button>
+  </nav>
+</section>
+
+<section class="scene hidden" id="hall">
+  <div class="hwrap">
+  <div class="pan"><div class="stage" id="hStage">
+    <div class="fg" style="left:50.3%;top:33%;width:52cqw"></div>
+    <img src="hall2.jpg" alt="殿內佛像端坐蓮台，兩側為光明燈、長生祿位與祖先牌位">
+    <div class="glow" id="glow"></div>
+    <div class="tip" id="hTip">點地面走動・下方選擇服務</div>
+    <div class="bless" id="hBless"></div>
+    <div class="fade" id="hFade"></div>
+    <div class="mouth" id="mouth"></div><div class="cap" id="cap"></div>
+    <div class="smoke hidden" id="smoke" style="left:50.3%;top:58%"><i></i><i></i><i></i></div>
+  </div></div>
+  <div class="sitbox hidden" id="sitbox"><div class="breath" id="br">吸</div><div><b id="bt">00:00</b><button class="act" id="rise" style="margin-top:6px">起身</button></div></div>
+  </div>
+  <nav class="acts" aria-label="殿內功能">
+    <button class="act" data-a="incense">點香</button>
+    <button class="act" data-a="bow">拜拜</button>
+    <button class="act" data-a="sit">靜坐</button>
+    <button class="act svc" data-a="lamp">點光明燈</button>
+    <button class="act svc" data-a="long">長生祿位</button>
+    <button class="act svc" data-a="lotus">祖先牌位</button>
+    <button class="act gold" data-a="donate">捐款護持</button>
+    <button class="act alt" data-a="out">回廟埕</button>
+  </nav>
+</section>
+
+<section class="band svcs" id="services"><div class="wrap">
+  <h2>功德服務</h2>
+  <div class="grid">
+    <article class="sc"><h3>光明燈</h3><p>點燈供佛，照破無明，祈求一年平安順遂、事業學業光明。</p>
+      <button class="go" data-a="lamp">我要點燈</button><div class="wall" id="wLamp"></div></article>
+    <article class="sc"><h3>長生祿位</h3><p>為在世親長、家人立紅色祿位，仰仗佛力加持，增福延壽、身體康泰。</p>
+      <button class="go" data-a="long">登記祿位</button><div class="wall" id="wLong"></div></article>
+    <article class="sc"><h3>祖先牌位</h3><p>為往生親友、歷代祖先立黃色蓮位，隨眾誦經迴向，超薦往生淨土。</p>
+      <button class="go" data-a="lotus">登記祖先牌位</button><div class="wall" id="wLotus"></div></article>
+  </div>
+  <div class="donband"><div><h3>捐款護持</h3><p>隨喜護持妙通寺寺務、建設與法會，廣種福田。</p></div><button class="go" data-a="donate">我要護持</button></div>
+  <p class="muted" style="color:#cdb79c;margin-top:16px">此為線上祈福示範，登記內容只保存在你的瀏覽器；正式安燈、立位請洽妙通寺服務處。寺裡出現的其他香客，是此刻同樣開著這個網頁的訪客。</p>
+</div></section>
+
+<section class="band sutra"><div class="wrap">
+  <div><h2>金剛經</h2><div class="gatha">一切有為法，<br>如夢幻泡影，<br>如露亦如電，<br>應作如是觀。</div></div>
+  <div><h2>般若波羅蜜多心經</h2>
+    <div class="heart">觀自在菩薩，行深般若波羅蜜多時，照見五蘊皆空，度一切苦厄。舍利子，色不異空，空不異色，色即是空，空即是色，受想行識，亦復如是。舍利子，是諸法空相，不生不滅，不垢不淨，不增不減。是故空中無色，無受想行識，無眼耳鼻舌身意，無色聲香味觸法，無眼界，乃至無意識界，無無明，亦無無明盡，乃至無老死，亦無老死盡。無苦集滅道，無智亦無得。以無所得故，菩提薩埵，依般若波羅蜜多故，心無罣礙，無罣礙故，無有恐怖，遠離顛倒夢想，究竟涅槃。三世諸佛，依般若波羅蜜多故，得阿耨多羅三藐三菩提。故知般若波羅蜜多，是大神咒，是大明咒，是無上咒，是無等等咒，能除一切苦，真實不虛。故說般若波羅蜜多咒，即說咒曰：揭諦揭諦，波羅揭諦，波羅僧揭諦，菩提薩婆訶。</div></div>
+</div></section>
+
+<footer><b>妙通寺</b><br>光明燈・長生祿位・牌位<br>南無本師釋迦牟尼佛</footer>
+
+<div class="modal hidden" id="modal" role="dialog" aria-modal="true"><div class="box"><button class="x" id="mx" aria-label="關閉">×</button><div id="mc"></div></div></div>
+
+<script>
+{
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const ROBES=[['海青','#2b2a33'],['縵衣','#8a5a2b'],['素白','#e9e4d8'],['藏青','#24406b'],['絳紅','#8e1c1c']];
+let user=store.get('mt_user2',null),sex=0,look=0,sound=true,ctx=null,scene='gate',me=null,busy=0,sitT=null;
+const today=new Date().toLocaleDateString('sv');
+let cnt=store.get('mt_cnt',{d:today,n:0});if(cnt.d!==today)cnt={d:today,n:0};
+const showCnt=()=>{$('#cnt').textContent=cnt.n};showCnt();
+const SC='子丑寅卯辰巳午未申酉戌亥';
+const tick=()=>{$('#sc').textContent=SC[Math.floor(((new Date().getHours()+1)%24)/2)]+'時'};tick();setInterval(tick,60000);
+
+/* 人像 */
+function fig(robe,fem,pose,back){
+  const SK='#f1c9a5',HR='#2b1d17',dy=pose==='stand'?0:pose==='kneel'?28:29;
+  const low=pose==='stand'?`<ellipse cx="30" cy="115" rx="17" ry="4" fill="#0005"/><path d="M16 75L44 75L49 112L11 112Z" fill="${robe}"/><ellipse cx="22" cy="113" rx="6" ry="3" fill="#222"/><ellipse cx="38" cy="113" rx="6" ry="3" fill="#222"/>`
+    :`<ellipse cx="30" cy="115" rx="26" ry="4" fill="#0005"/><ellipse cx="30" cy="107" rx="${pose==='lotus'?27:21}" ry="${pose==='lotus'?9:10}" fill="${robe}"/>`;
+  const arms=back?`<path d="M18 46L16 66M42 46L44 66" stroke="${robe}" stroke-width="7" stroke-linecap="round"/>`
+    :pose==='lotus'?`<path d="M19 46Q16 66 25 72M41 46Q44 66 35 72" stroke="${robe}" stroke-width="7" stroke-linecap="round" fill="none"/><ellipse cx="30" cy="73" rx="7" ry="3" fill="${SK}"/>`
+    :`<path d="M19 46L27 57M41 46L33 57" stroke="${robe}" stroke-width="7" stroke-linecap="round"/><ellipse cx="30" cy="55" rx="3.5" ry="6" fill="${SK}"/>`;
+  const head=back?`<circle cx="30" cy="24" r="11" fill="${HR}"/>`+(fem?`<circle cx="30" cy="11" r="5" fill="${HR}"/><path d="M19 24Q18 34 22 37L38 37Q42 34 41 24Z" fill="${HR}"/>`:'')
+    :`<circle cx="30" cy="24" r="11" fill="${SK}"/><circle cx="26" cy="25" r="1.2" fill="#3a2a22"/><circle cx="34" cy="25" r="1.2" fill="#3a2a22"/><path d="M27 29Q30 31 33 29" stroke="#a0584a" fill="none" stroke-width="1"/><path d="M19 23Q18 11 30 11Q42 11 41 23Q37 16 30 16Q23 16 19 23Z" fill="${HR}"/>`
+      +(fem?`<circle cx="30" cy="10" r="5" fill="${HR}"/><path d="M19 22Q16 32 20 37L23 22ZM41 22Q44 32 40 37L37 22Z" fill="${HR}"/>`:'');
+  const torso=`<path d="M18 44Q30 37 42 44L44 78L16 78Z" fill="${robe}"/>`+(back?'':`<path d="M24 41L30 53L36 41" fill="none" stroke="#fff6" stroke-width="2"/>`);
+  return `<svg viewBox="0 0 60 120">${low}<g transform="translate(0 ${dy})"><g class="up"><rect x="27" y="32" width="6" height="8" fill="${SK}"/>${torso}${arms}${head}</g></g></svg>`;
+}
+function makeAv(stage,o){const d=document.createElement('div');d.className='av'+(o.me?' me':'');d.wk=0;d.dataset.pose='stand';stage.appendChild(d);d.o=o;place(d,o.x,o.y,0);pose(d,'stand',false);return d}
+function pose(d,p,back){back=true;d.dataset.pose=p;d.back=true;d.innerHTML=`<div class="nm">${esc(d.o.name)}</div>`+fig(d.o.robe,d.o.fem,p,back);if(d===me)push()}
+const sizeOf=(st,y)=>st.id==='gStage'?Math.max(3,6+(y-66)*.22):11+(y-88)*.35;
+function place(d,x,y,ms){const st=d.parentNode;d.style.transition=ms?`left ${ms}ms linear,top ${ms}ms linear,height ${ms}ms linear`:'none';d.style.left=x+'%';d.style.top=y+'%';d.style.setProperty('--s',sizeOf(st,y));d.style.zIndex=Math.round(y*9);d.x=x;d.y=y}
+function walk(d,x,y,cb){if(d===me&&act.h){act.h.style.visibility='';act.h=null}const st=d.parentNode,id=++d.wk;const dist=Math.hypot((x-d.x)*1.3,(y-d.y)*1);const ms=Math.max(250,dist*38);
+  if(d.dataset.pose!=='stand')pose(d,'stand',true);
+  d.classList.remove('bowing');d.classList.add('walking');place(d,x,y,ms);follow(d,x);if(d===me)push();
+  clearTimeout(d.wt);d.wt=setTimeout(()=>{if(d.wk!==id)return;d.classList.remove('walking');cb&&cb()},ms)}
+
+/* 其他香客：只有同一時間開著這個網頁的真人才會出現 */
+let room=null,lt=null;const others=new Map();
+function push(){if(!room)return;const v=user&&me?{n:user.n,s:user.s,l:user.l,sc:scene,x:+(+me.x).toFixed(1),y:+(+me.y).toFixed(1),p:me.dataset.pose,lt}:{sc:null};room.presence({v}).catch(()=>{});countPpl()}
+function countPpl(){let n=user?1:0;others.forEach(()=>n++);$('#ppl').textContent=n}
+function syncPeers(peers){const seen=new Set();
+  for(const p of peers){if(p.isMe)continue;const v=p.presence&&p.presence.v;
+    if(!v||typeof v!=='object'||(v.sc!=='gate'&&v.sc!=='hall')||typeof v.n!=='string'||!v.n.trim())continue;
+    seen.add(p.peer);const st=$(v.sc==='gate'?'#gStage':'#hStage');
+    const[x,y]=clampXY(st,Number.isFinite(+v.x)?+v.x:50,Number.isFinite(+v.y)?+v.y:90);
+    const pp=['stand','kneel','lotus'].includes(v.p)?v.p:'stand';
+    let a=others.get(p.peer);
+    if(a&&a.parentNode!==st){a.remove();a=null}
+    if(!a){a=makeAv(st,{name:v.n.slice(0,10),robe:(ROBES[v.l|0]||ROBES[0])[1],fem:v.s?1:0,x,y});others.set(p.peer,a);if(pp!=='stand')pose(a,pp,true)}
+    else if(Math.abs(a.x-x)>.05||Math.abs(a.y-y)>.05)walk(a,x,y,()=>{if(pp!=='stand')pose(a,pp,true)});
+    else if(a.dataset.pose!==pp&&!a.classList.contains('walking'))pose(a,pp,true);
+    if(v.lt&&typeof v.lt==='object'&&typeof v.lt.w==='string'&&v.lt.t!==a.lt){const first=a.lt===undefined;a.lt=v.lt.t;if(!first&&v.sc==='gate'&&scene==='gate')setTimeout(()=>flyLantern(a,v.lt.w.slice(0,4)),900)}}
+  for(const[k,a]of others)if(!seen.has(k)){a.remove();others.delete(k)}
+  countPpl()}
+try{if(window.claude&&claude.use)claude.use('room').then(r=>{if(!r)return;room=r;r.onPeers(c=>syncPeers(c.peers),()=>{});push()}).catch(()=>{})}catch(e){}
+
+/* 天燈・佛光・彩虹 */
+function fo(st,ms){const f=st.querySelector('.fg');if(!f)return;if(st.id==='gStage')rainbow(ms||9000);f.classList.add('on');clearTimeout(f.t);if(ms)f.t=setTimeout(()=>f.classList.remove('on'),ms)}
+function foOff(st){const f=st.querySelector('.fg');if(f){clearTimeout(f.t);f.classList.remove('on')}}
+function rainbow(ms){const r=$('#rainbow');r.classList.add('on');clearTimeout(r.t);r.t=setTimeout(()=>r.classList.remove('on'),ms||12000)}
+function centerPan(st){const p=st.parentNode;if(p&&p.classList.contains('pan'))p.scrollLeft=(p.scrollWidth-p.clientWidth)/2}
+function follow(d,x){if(d!==me)return;const st=d.parentNode,p=st&&st.parentNode;if(!p||!p.classList.contains('pan')||p.scrollWidth<=p.clientWidth+2)return;
+  p.scrollTo({left:x/100*st.clientWidth-p.clientWidth/2,behavior:'smooth'})}
+function flyLantern(d,wish){const st=d.parentNode;if(!st)return;const W=st.clientWidth,H=st.clientHeight;
+  const L=document.createElement('div');L.className='lantern';L.innerHTML='<u></u><i></i><b></b>';{const w=[...String(wish)].slice(0,4);L.querySelector('b').textContent=w.length>2?w.slice(0,2).join('')+'\n'+w.slice(2).join(''):w.join('')}st.appendChild(L);
+  const th=40*Math.PI/180,x0=d.x/100*W,y0=d.y/100*H-d.offsetHeight*1.05,x1=(.5+.53*Math.sin(th))*W,y1=(.58-.53*Math.cos(th))*H,ks=[];
+  for(let i=0;i<=20;i++){const t=i/20,ty=1-(1-t)**1.6,tx=t**1.35,e=t>.78?(t-.78)/.22:0;
+    ks.push({transform:`translate(${x0+(x1-x0)*tx+Math.sin(t*10)*W*.012*(1-e)}px,${y0+(y1-y0)*ty}px) translate(-50%,-50%) scale(${(1-.45*t)*(1-.8*e)})`,
+      opacity:i===0?0:e?Math.max(0,1-e*e):1,filter:`brightness(${1+e*1.8})`})}
+  L.animate(ks,{duration:11000,easing:'cubic-bezier(.35,.1,.4,1)'}).onfinish=()=>{L.remove();vanish(st,x1,y1)}}
+function vanish(st,x,y){const S=document.createElement('div');S.className='spark';S.style.left=x+'px';S.style.top=y+'px';
+  S.innerHTML='<i></i>'+Array.from({length:10},(_,k)=>`<em style="--a:${k*36}deg"></em>`).join('');st.appendChild(S);
+  const r=$('#rainbow');r.classList.add('flash');setTimeout(()=>r.classList.remove('flash'),1400);setTimeout(()=>S.remove(),2000)}
+const WISH=['平安健康','闔家幸福','事業順利','學業進步','財源廣進','心想事成'];
+function lanternForm(){let w=WISH[0];
+  open(`<h3>點天燈</h3><p class="muted">寫下心願，讓天燈帶著祝福升上天空。</p><div class="form" id="lf">
+  <label>祈福人<input id="lfN" maxlength="10" required></label>
+  <div><div class="muted" style="margin-bottom:6px">心願</div><div class="wishes" id="lfW">${WISH.map((x,i)=>`<button type="button" aria-pressed="${i===0}">${x}</button>`).join('')}</div></div>
+  <label>或自己寫（最多 4 字）<input id="lfC" maxlength="4" placeholder="例如：身體安康"></label>
+  <button class="go red" id="lfGo">放天燈</button></div>`);
+  $('#lfN').value=user.n;
+  document.querySelectorAll('#lfW button').forEach(b=>b.onclick=()=>{w=b.textContent;document.querySelectorAll('#lfW button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+  $('#lfGo').onclick=()=>{const n=$('#lfN').value.trim()||user.n,c=$('#lfC').value.trim(),wish=c||w;close();
+    walk(me,26,90,()=>{pose(me,'stand',true);bell(330,4);lt={w:wish,t:Date.now()};push();flyLantern(me,wish);fo($('#gStage'),11000);setTimeout(()=>{const st=$('#gStage'),p=st.parentNode;if(p.scrollWidth>p.clientWidth+2)p.scrollTo({left:.62*st.clientWidth-p.clientWidth/2,behavior:'smooth'})},1800);rainbow(14000);
+      const l=store.get('mt_sky',[]);l.push({n,w:wish});store.set('mt_sky',l);flash('gBless',n+'・'+wish)})}}
+
+/* 捐款護持 */
+const DUSE=['隨喜護持','寺務建設','光明燈油香','法會供養','慈善濟助'],DAMT=[100,300,600,1000,3000];
+function donate(){let u=DUSE[0],m=DAMT[2];
+  open(`<h3>捐款護持</h3><p class="muted">一分心意，護持道場、廣種福田。</p><div class="form">
+  <label>護持人<input id="dN" maxlength="12" required></label>
+  <div><div class="muted" style="margin-bottom:6px">護持項目</div><div class="wishes" id="dU">${DUSE.map((x,i)=>`<button type="button" aria-pressed="${i===0}">${x}</button>`).join('')}</div></div>
+  <div><div class="muted" style="margin-bottom:6px">金額（新台幣）</div><div class="wishes" id="dA">${DAMT.map((x,i)=>`<button type="button" aria-pressed="${i===2}" data-v="${x}">${x.toLocaleString()} 元</button>`).join('')}</div></div>
+  <label>其他金額<input id="dO" type="number" inputmode="numeric" min="1" placeholder="自行輸入"></label>
+  <button class="go red" id="dGo">確認護持</button>
+  <p class="muted">線上付款尚未開通；按下確認後會顯示護持登記，款項請依寺方公告方式奉獻，或洽妙通寺服務處。</p></div>`);
+  $('#dN').value=user?user.n:'';
+  const seg=(id,cb)=>document.querySelectorAll(id+' button').forEach(b=>b.onclick=()=>{cb(b);document.querySelectorAll(id+' button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+  seg('#dU',b=>u=b.textContent);seg('#dA',b=>{m=+b.dataset.v;$('#dO').value=''});
+  $('#dGo').onclick=()=>{const n=$('#dN').value.trim();if(!n){$('#dN').focus();return}const o=parseInt($('#dO').value,10),amt=o>0?o:m;
+    const l=store.get('mt_don',[]);l.push({n,u,amt,d:today});store.set('mt_don',l);bell(262,5);
+    open(`<h3>感恩護持</h3><p><b>${esc(n)}</b> 發心護持「${esc(u)}」新台幣 <b>${amt.toLocaleString()}</b> 元。</p><p>功德迴向：願您福慧增長、闔家平安。</p><p class="muted">此為護持登記，尚未付款。款項請依寺方公告方式奉獻，或洽妙通寺服務處。</p>`);
+    const st=scene==='hall'?$('#hStage'):$('#gStage');if(scene==='hall')fo(st,7000);flash(scene==='hall'?'hBless':'gBless','感恩 '+n+' 護持')}}
+
+/* 聲音 */
+const ac=()=>{if(!ctx){try{ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}return ctx};
+function bell(f=220,len=4){if(!sound)return;const c=ac();if(!c)return;const t=c.currentTime;
+  [1,2.76,5.4].forEach((m,i)=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=f*m;g.gain.setValueAtTime(.22/(i+1),t);g.gain.exponentialRampToValueAtTime(.0001,t+len/(i+1));o.connect(g).connect(c.destination);o.start(t);o.stop(t+len)})}
+$('#sBtn').onclick=e=>{sound=!sound;const b=e.currentTarget;b.textContent='聲音 '+(sound?'開':'關');b.setAttribute('aria-pressed',sound);};
+
+/* 入寺表單 */
+$('#looks').innerHTML=ROBES.map((r,i)=>`<button type="button" aria-label="${r[0]}" title="${r[0]}" aria-pressed="${i===0}" data-i="${i}" style="background:${r[1]}"></button>`).join('');
+const pv=()=>{$('#pv').outerHTML=fig(ROBES[look][1],sex,'stand',false).replace('<svg','<svg class="preview" id="pv"')};pv();
+document.querySelectorAll('#sex button').forEach(b=>b.onclick=()=>{sex=+b.dataset.v;document.querySelectorAll('#sex button').forEach(x=>x.setAttribute('aria-pressed',x===b));pv()});
+document.querySelectorAll('#looks button').forEach(b=>b.onclick=()=>{look=+b.dataset.i;document.querySelectorAll('#looks button').forEach(x=>x.setAttribute('aria-pressed',x===b));pv()});
+
+const fixG=(x,y)=>(x>39&&x<61&&y>64&&y<87)?[x,88]:[x,y];
+const LIM={gStage:[3,97,67,98],hStage:[4,96,79,99]};
+const clampXY=(st,x,y)=>{const l=LIM[st.id];return[Math.min(l[1],Math.max(l[0],x)),Math.min(l[3],Math.max(l[2],y))]};
+function stageClick(e){const st=e.currentTarget;if(!me||me.parentNode!==st||busy)return;if(e.target.closest('.hot,.entry,.sitbox'))return;
+  const r=st.getBoundingClientRect();const[x,y]=clampXY(st,(e.clientX-r.left)/r.width*100,(e.clientY-r.top)/r.height*100);stopSit();if(st.id==='hStage')showProp('');const[fx,fy]=st.id==='gStage'?fixG(x,y):[x,y];walk(me,fx,fy)}
+$('#gStage').onclick=stageClick;$('#hStage').onclick=stageClick;
+
+const HOTS={gStage:[[50,53,'入寺','enter'],[50,64,'天公爐','incense']]};
+for(const id in HOTS)$('#'+id).insertAdjacentHTML('beforeend',HOTS[id].map(([x,y,l,a])=>`<button class="hot" data-a="${a}" style="left:${x}%;top:${y}%" aria-label="${l}"><span>${l}</span></button>`).join(''));
+$('#hStage').insertAdjacentHTML('beforeend',`
+  <button class="whit" data-a="lamp" aria-label="光明燈" style="left:7.5%;top:13%;width:6.2%;height:48%"></button>
+  <button class="whit" data-a="lamp" aria-label="光明燈" style="left:20.4%;top:12%;width:10%;height:49%"></button>
+  <button class="whit" data-a="long" aria-label="長生祿位" style="left:70.5%;top:12%;width:10.1%;height:49%"></button>
+  <button class="whit" data-a="lotus" aria-label="祖先牌位" style="left:87.2%;top:13%;width:6.2%;height:48%"></button>
+  <div class="wsign" style="left:10.6%;top:13.6%">光明燈</div>
+  <div class="wsign" style="left:25.4%;top:13.9%">光明燈</div>
+  <div class="wsign" style="left:75.55%;top:13.9%">長生祿位</div>
+  <div class="wsign" style="left:90.3%;top:13.6%">祖先牌位</div>
+  <div class="wpanel pv" data-p="lamp" id="pLamp" style="left:18.5%;top:17%;width:14%"></div>
+  <div class="wpanel pv" data-p="long" id="pLong" style="left:68.5%;top:17%;width:14%"></div>
+  <div class="wpanel pv" data-p="lotus" id="pLotus" style="right:1%;top:17%;width:14%"></div>`);
+for(const b of document.querySelectorAll('#hStage .whit'))b.addEventListener('click',e=>{e.stopPropagation();act(b.dataset.a)});
+function renderPanels(){
+  const L=store.get('mt_lamp',[]),G=store.get('mt_long',[]),P=store.get('mt_lotus',[]);
+  const box=(t,list,f,empty)=>`<h5>${t}</h5>`+(list.length?`<div class="wl">${list.slice(-6).reverse().map(f).join('')}</div><small>共 ${list.length} 位</small>`:`<p>${empty}</p>`);
+  $('#pLamp').innerHTML=box('光明燈',L,d=>`<div class="wi"><b>${esc(d.n)}</b>${esc(d.w||'')}</div>`,'尚未點燈');
+  $('#pLong').innerHTML=box('長生祿位',G,d=>`<span class="mt r">${esc(d.n)}</span>`,'尚無祿位');
+  $('#pLotus').innerHTML=box('祖先牌位',P,d=>`<span class="mt y">${esc(d.n)}</span>`,'尚無牌位')}
+
+
+function atGate(){const has=!!user;countPpl();centerPan($('#gStage'));$('#entry').classList.toggle('hidden',has);$('#gActs').classList.toggle('hidden',!has);$('#outBtn').classList.toggle('hidden',!has);$('#gTip').classList.toggle('hidden',!has);
+  if(has){if(!me)me=makeAv($('#gStage'),{me:1,name:user.n,robe:ROBES[user.l][1],fem:user.s,x:44,y:95})}}
+if(user){$('#nick').value=user.n}
+atGate();
+$('#entry').onsubmit=e=>{e.preventDefault();const n=$('#nick').value.trim();if(!n)return;user={n,s:sex,l:look};store.set('mt_user2',user);bell(330,3);atGate();flash('gBless','歡迎 '+n+' 來到妙通寺')};
+
+function flash(id,t){const b=$('#'+id);b.textContent=t;b.classList.add('on');clearTimeout(b.t);b.t=setTimeout(()=>b.classList.remove('on'),3000)}
+function moveTo(stage,x,y){me.remove();stage.appendChild(me);place(me,x,y,0);pose(me,'stand',false)}
+function enterHall(){if(busy)return;busy=1;walk(me,me.x<50?37:63,76,()=>walk(me,50,66,()=>walk(me,50,57,()=>{$('#gFade').classList.add('on');bell(220,5);
+  setTimeout(()=>{scene='hall';$('#gate').classList.add('hidden');$('#hall').classList.remove('hidden');$('#gFade').classList.remove('on');moveTo($('#hStage'),50.2,93);centerPan($('#hStage'));busy=0;$('#hTip').classList.remove('off');setTimeout(()=>$('#hTip').classList.add('off'),4000);
+    $('#hall').scrollIntoView({behavior:'smooth',block:'start'});flash('hBless','南無本師釋迦牟尼佛')},700)})))}
+function leaveHall(){stopSit();showProp('');scene='gate';$('#hall').classList.add('hidden');$('#gate').classList.remove('hidden');moveTo($('#gStage'),50,66);centerPan($('#gStage'));walk(me,me.x<50?37:63,78,()=>walk(me,44,94))}
+
+/* 靜坐 */
+const HEART=document.querySelector('.heart').textContent.match(/[^，。：]+[，。：]?/g);
+let hi=-1,hT=null;
+function flyChar(ch,delay){const st=$('#hStage'),W=st.clientWidth,H=st.clientHeight;if(!me||me.parentNode!==st)return;
+  const sx=.502*W,sy=.237*H,h=me.offsetHeight,tx=me.x/100*W,ty=me.y/100*H-h*.42;
+  const f=document.createElement('span');f.className='fly';f.textContent=ch;st.appendChild(f);
+  const mx=(sx+tx)/2+(Math.random()-.5)*W*.12,my=Math.min(sy,ty)-H*.02+(Math.random()-.5)*H*.08;
+  const an=f.animate([{transform:`translate(${sx}px,${sy}px) translate(-50%,-50%) scale(.3)`,opacity:0},
+    {transform:`translate(${sx}px,${sy+H*.04}px) translate(-50%,-50%) scale(1)`,opacity:1,offset:.15},
+    {transform:`translate(${mx}px,${my+H*.15}px) translate(-50%,-50%) scale(1.1)`,opacity:1,offset:.55},
+    {transform:`translate(${tx}px,${ty}px) translate(-50%,-50%) scale(.35)`,opacity:.2}],{duration:3200,delay,easing:'ease-in-out',fill:'backwards'});
+  an.onfinish=()=>{f.remove();if(me){me.classList.remove('absorb');void me.offsetWidth;me.classList.add('absorb')}}}
+function sutraStep(){hi=(hi+1)%HEART.length;if(hi===0)bell(196,5);const p=HEART[hi];
+  [...p.replace(/[，。：]/g,'')].forEach((c,i)=>flyChar(c,i*260));
+  const cap=$('#cap');cap.textContent=p;cap.classList.add('on');
+  hT=setTimeout(sutraStep,Math.max(2200,p.length*420))}
+function startSit(){fo($('#hStage'));pose(me,'lotus',false);me.classList.add('blessed');$('#glow').classList.add('on');bell(196,6);let s=0;$('#sitbox').classList.remove('hidden');$('#mouth').classList.add('on');$('#bt').textContent='00:00';
+  flash('hBless','心經加持・身心清淨');hi=-1;clearTimeout(hT);hT=setTimeout(sutraStep,1500);
+  sitT=setInterval(()=>{s++;$('#bt').textContent=String(s/60|0).padStart(2,'0')+':'+String(s%60).padStart(2,'0');$('#br').textContent=(s%10)<5?'吸':'呼';if(s%60===0)bell(196,5)},1000)}
+function stopSit(){if(!sitT)return;foOff($('#hStage'));clearInterval(sitT);sitT=null;clearTimeout(hT);$('#sitbox').classList.add('hidden');$('#mouth').classList.remove('on');$('#cap').classList.remove('on');document.querySelectorAll('.fly').forEach(f=>f.remove());$('#glow').classList.remove('on');me&&me.classList.remove('blessed');bell(196,4);if(me)pose(me,'stand',false)}
+$('#rise').onclick=e=>{e.stopPropagation();stopSit();if(act.h){act.h.style.visibility='';act.h=null}};
+
+/* 對話框 */
+const open=h=>{$('#mc').innerHTML=h;$('#modal').classList.remove('hidden');$('#mx').focus()};
+const close=()=>$('#modal').classList.add('hidden');
+$('#mx').onclick=close;$('#modal').onclick=e=>{if(e.target.id==='modal')close()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+
+
+const SVC={
+ lamp:{t:'點光明燈',k:'mt_lamp',f:[['姓名','n',true],['農曆生日（選填）','b',false]],sel:['祈願',['闔家平安','事業順利','學業進步','身體健康','消災解厄']]},
+ long:{t:'長生祿位',k:'mt_long',f:[['受供者姓名','n',true],['生辰（選填）','b',false],['陽上祈福人','p',true]]},
+ lotus:{t:'祖先牌位',k:'mt_lotus',f:[['往生者稱謂及姓名（如：先父 王大明）','n',true],['陽上孝眷','p',true]]}};
+function svcForm(a){const s=SVC[a];
+  open(`<h3>${s.t}</h3><p class="muted">${a==='lamp'?'於佛前點燈一盞，照亮一年。':a==='long'?'紅色長生祿位，祈求福壽綿長。':'黃色往生蓮位，仰仗佛力超薦。'}</p>
+  <form class="form" id="sf">${s.f.map(([l,k,r])=>`<label>${l}<input name="${k}" maxlength="20" ${r?'required':''}></label>`).join('')}
+  ${s.sel?`<label>${s.sel[0]}<select name="w">${s.sel[1].map(o=>`<option>${o}</option>`).join('')}</select></label>`:''}
+  <button class="go red">${a==='lamp'?'點燈':'立位'}</button></form>`);
+  $('#sf').onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target));const list=store.get(s.k,[]);list.push(d);store.set(s.k,list);render();bell(262,5);
+    if(a==='lamp'){$('#glow').classList.add('on');setTimeout(()=>$('#glow').classList.remove('on'),6000)}
+    open(`<h3>功德圓滿</h3><p>${a==='lamp'?`已為 <b>${esc(d.n)}</b> 點亮光明燈，祈願${esc(d.w)}。`:a==='long'?`已為 <b>${esc(d.n)}</b> 立長生祿位，祈福壽康寧。`:`已為 <b>${esc(d.n)}</b> 立往生蓮位，願往生西方淨土。`}</p><p class="muted">可在下方「功德服務」看到登記內容。</p>`);
+    fo($('#hStage'),7000);flash('hBless',a==='lamp'?'光明普照':a==='long'?'福壽綿長':'蓮品增上')}}
+function render(){
+  const L=store.get('mt_lamp',[]),G=store.get('mt_long',[]),P=store.get('mt_lotus',[]);
+  $('#wLamp').innerHTML=L.length?L.map(d=>`<div class="lamp">${esc(d.n)}</div>`).join(''):'<span class="empty">尚未點燈</span>';
+  $('#wLong').innerHTML=G.length?G.map(d=>`<div class="tab long">佛光注照 ${esc(d.n)} 長生祿位<small>　陽上 ${esc(d.p)} 敬立</small></div>`).join(''):'<span class="empty">尚無祿位</span>';
+  $('#wLotus').innerHTML=P.length?P.map(d=>`<div class="tab lotus">佛力超薦 ${esc(d.n)} 往生蓮位<small>　陽上 ${esc(d.p)} 敬立</small></div>`).join(''):'<span class="empty">尚無牌位</span>';
+  renderPanels()}
+render();
+
+/* 動作：先走過去，再做事；相關陳設點了才出現 */
+function showProp(a){document.querySelectorAll('#hStage .pv').forEach(p=>p.classList.toggle('show',p.dataset.p.split(' ').includes(a)))}
+const SPOT={incense:[50.2,80.5],bow:[50.2,89.5],long:[75.6,84],lotus:[90,86],lamp:[25.4,84],sit:[65.6,97.5]};
+function act(a){
+  if(a==='donate')return donate();
+  if(!user||!me){if(SVC[a])return svcForm(a);$('#gate').scrollIntoView({behavior:'smooth'});return}
+  if(a==='enter')return scene==='gate'?enterHall():null;
+  if(a==='out')return leaveHall();
+  if(scene!=='hall'){
+    if(SVC[a])return svcForm(a);
+    if(a==='sky')return busy?null:lanternForm();
+    if(busy||(a!=='incense'&&a!=='bow'))return enterHall();
+    return walk(me,50,94,()=>{
+      if(a==='incense'){pose(me,'stand',true);cnt.n+=3;store.set('mt_cnt',cnt);showCnt();bell(392,3);flash('gBless','敬拜天公・清香三炷')}
+      else{busy=1;pose(me,'kneel',true);me.classList.add('bowing');[0,2400,4800].forEach(t=>setTimeout(()=>bell(220,4),t+900));flash('gBless',user.n+' 誠心禮拜');
+        setTimeout(()=>{me.classList.remove('bowing');pose(me,'stand',true);busy=0},7300)}})}
+  if(busy)return;stopSit();showProp(a);const[x,y]=SPOT[a];
+  walk(me,x,y,()=>{
+    const h=$('#hStage .hot[data-a='+a+']');if(h&&(a==='sit'||a==='bow')){h.style.visibility='hidden';act.h=h}
+    if(SVC[a])return svcForm(a);
+    if(a==='incense'){pose(me,'stand',true);cnt.n+=3;store.set('mt_cnt',cnt);showCnt();$('#smoke').classList.remove('hidden');clearTimeout(act.t);act.t=setTimeout(()=>$('#smoke').classList.add('hidden'),20000);bell(392,3);fo($('#hStage'),7000);flash('hBless','清香三炷，敬禮三寶')}
+    else if(a==='bow'){busy=1;fo($('#hStage'),9000);pose(me,'kneel',true);me.classList.add('bowing');[0,2400,4800].forEach(t=>setTimeout(()=>bell(220,4),t+900));flash('hBless',user.n+' 誠心頂禮');
+      setTimeout(()=>{me.classList.remove('bowing');pose(me,'stand',false);busy=0},7300)}
+    else if(a==='sit')startSit();
+  })}
+document.querySelectorAll('[data-a]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();act(b.dataset.a)}));
+$('#outBtn').onclick=()=>{stopSit();if(scene==='hall')leaveHall();me&&me.remove();me=null;user=null;store.set('mt_user2',null);atGate();push()};
+}
+</script>
+</body>
+</html>
